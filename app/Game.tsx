@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useRef } from "react";
-import type { Snake, Eat } from "@/types";
+import type { Snake, Eat, GameStatus } from "@/types";
 
 const initialSnake: Snake = {
     coords: [
@@ -15,7 +15,12 @@ const initialSnake: Snake = {
     nextDirection: "up",
 };
 
-export const Game = () => {
+type GameProps = {
+    status: GameStatus["status"];
+    setStatus: (status: GameStatus["status"]) => void;
+};
+
+export const Game = ({ status, setStatus } : GameProps) => {
     const fieldWidth = 50;
     const fieldHeight = 50;
 
@@ -64,11 +69,11 @@ export const Game = () => {
     };
 
     useEffect(() => {
+        if (status !== 'playing') return;
         const interval = setInterval(() => {
             setSnake((prevSnake) => {
-                const newCoords = prevSnake.coords.slice(0, -1);
                 const direction = prevSnake.nextDirection || prevSnake.direction;
-                const getHeadCoord = () => {
+                const getHeadCoords = () => {
                     switch (direction) {
                         case "up":
                             return [prevSnake.coords[0][0], (prevSnake.coords[0][1] - 1 + fieldHeight) % fieldHeight];
@@ -80,7 +85,26 @@ export const Game = () => {
                             return [(prevSnake.coords[0][0] + 1) % fieldWidth, prevSnake.coords[0][1]];
                     }
                 };
-                newCoords.unshift(getHeadCoord());
+
+                const headCoords = getHeadCoords();
+
+                const isSnakeOverlaps = prevSnake.coords.some((coord) => coord[0] === headCoords[0] && coord[1] === headCoords[1]);
+                if (isSnakeOverlaps) {
+                    setStatus('lost');
+                    return prevSnake;
+                }
+
+                const isSnakeEating = headCoords[0] === eat.coords[0] && headCoords[1] === eat.coords[1];
+
+                let newCoords = null;
+                if (isSnakeEating) {                   
+                    regenerateEat();
+                    newCoords = prevSnake.coords;
+                } else {
+                    newCoords = prevSnake.coords.slice(0, -1);
+                }
+
+                newCoords.unshift(headCoords);
 
                 return {
                     ...prevSnake,
@@ -94,9 +118,9 @@ export const Game = () => {
         return () => {
             clearInterval(interval);
         };
-    }, []);
-
+    }, [status, eat.coords]);
     useEffect(() => {
+        if (status !== 'playing') return;
         const eatInterval = setInterval(() => {
             regenerateEat();
         }, 10000);
@@ -104,7 +128,7 @@ export const Game = () => {
         return () => {
             clearInterval(eatInterval);
         };
-    }, []);
+    }, [status, eat.coords]);
 
     useEffect(() => {
         document.addEventListener("keydown", handleChangeDirection);
