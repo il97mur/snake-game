@@ -49,6 +49,7 @@ export const Game = () => {
         [snake.direction, snake.nextDirection]
     );
 
+
     const regenerateEat = () => {
         const generateEatCoords = (): [number, number] => {
             const XCoord = Math.floor(Math.random() * fieldWidth);
@@ -64,7 +65,7 @@ export const Game = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             setSnake((prevSnake) => {
-                const newCoords = prevSnake.coords.slice(1);
+                const newCoords = prevSnake.coords.slice(0, -1);
                 const direction = prevSnake.nextDirection || prevSnake.direction;
                 const getHeadCoord = () => {
                     switch (direction) {
@@ -90,7 +91,7 @@ export const Game = () => {
                             ];
                     }
                 };
-                newCoords.push(getHeadCoord());
+                newCoords.unshift(getHeadCoord());
 
                 return {
                     ...prevSnake,
@@ -99,17 +100,22 @@ export const Game = () => {
                     nextDirection: null,
                 };
             });
-        }, 50);
-
-        const eatInterval = setInterval(() => {
-            regenerateEat();
-        }, 5000);
+        }, 100);
 
         return () => {
             clearInterval(interval);
-            clearInterval(eatInterval);
         };
     }, []);
+
+    useEffect(() => {
+        const eatInterval = setInterval(() => {
+            regenerateEat();
+        }, 10000);
+
+        return () => {
+            clearInterval(eatInterval);
+        }
+    }, [])
 
     useEffect(() => {
         document.addEventListener("keydown", handleChangeDirection);
