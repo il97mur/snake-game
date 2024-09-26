@@ -20,7 +20,9 @@ export const Game = () => {
     const fieldHeight = 50;
 
     const [snake, setSnake] = useState<Snake>(initialSnake);
-    const [eat, setEat] = useState<Eat>({ coords: [Math.round(Math.random() * fieldWidth), Math.round(Math.random() * fieldHeight)]});
+    const [eat, setEat] = useState<Eat>({
+        coords: [Math.round(Math.random() * fieldWidth), Math.round(Math.random() * fieldHeight)],
+    });
 
     const handleChangeDirection = useCallback(
         (event: KeyboardEvent) => {
@@ -49,7 +51,6 @@ export const Game = () => {
         [snake.direction, snake.nextDirection]
     );
 
-
     const regenerateEat = () => {
         const generateEatCoords = (): [number, number] => {
             const XCoord = Math.floor(Math.random() * fieldWidth);
@@ -58,8 +59,8 @@ export const Game = () => {
                 return generateEatCoords();
             }
             return [XCoord, YCoord];
-        }
-        setEat({ coords: generateEatCoords()});
+        };
+        setEat({ coords: generateEatCoords() });
     };
 
     useEffect(() => {
@@ -70,25 +71,13 @@ export const Game = () => {
                 const getHeadCoord = () => {
                     switch (direction) {
                         case "up":
-                            return [
-                                prevSnake.coords[0][0],
-                                (prevSnake.coords[0][1] - 1 + fieldHeight) % fieldHeight,
-                            ];
+                            return [prevSnake.coords[0][0], (prevSnake.coords[0][1] - 1 + fieldHeight) % fieldHeight];
                         case "down":
-                            return [
-                                prevSnake.coords[0][0],
-                                (prevSnake.coords[0][1] + 1) % fieldHeight,
-                            ];
+                            return [prevSnake.coords[0][0], (prevSnake.coords[0][1] + 1) % fieldHeight];
                         case "left":
-                            return [
-                                (prevSnake.coords[0][0] - 1 + fieldWidth) % fieldWidth,
-                                prevSnake.coords[0][1],
-                            ];
+                            return [(prevSnake.coords[0][0] - 1 + fieldWidth) % fieldWidth, prevSnake.coords[0][1]];
                         case "right":
-                            return [
-                                (prevSnake.coords[0][0] + 1) % fieldWidth,
-                                prevSnake.coords[0][1],
-                            ];
+                            return [(prevSnake.coords[0][0] + 1) % fieldWidth, prevSnake.coords[0][1]];
                     }
                 };
                 newCoords.unshift(getHeadCoord());
@@ -114,8 +103,8 @@ export const Game = () => {
 
         return () => {
             clearInterval(eatInterval);
-        }
-    }, [])
+        };
+    }, []);
 
     useEffect(() => {
         document.addEventListener("keydown", handleChangeDirection);
